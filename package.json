@@ -5,14 +5,20 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "stop": "next gerenciador-tarefas-next.js"
   },
   "dependencies": {
+    "jsonwebtoken": "^8.5.1",
+    "md5": "^2.3.0",
+    "mongoose": "^6.0.13",
     "next": "12.0.3",
     "react": "17.0.2",
     "react-dom": "17.0.2"
   },
   "devDependencies": {
+    "@types/jsonwebtoken": "^8.5.6",
+    "@types/md5": "^2.3.1",
     "@types/node": "16.11.7",
     "@types/react": "17.0.34",
     "eslint": "7.32.0",
