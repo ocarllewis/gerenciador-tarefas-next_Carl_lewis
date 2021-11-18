@@ -4,8 +4,17 @@ import { DefaultResponse } from '../../types/DefaultResponse';
 import { UserModel } from '../../models/UserModel';
 import {dbConnect} from '../../middlewares/dbConnect'
 import {User } from '../../types/User';
+import {corsPolicy} from "../../middlewares/corsPolicy";
 
+class UserValidate {
+    isValid: boolean
+    message: string
 
+    constructor(isValid: boolean, message: string) {
+        this.isValid = isValid;
+        this.message = message;
+    }
+}
 
   const handler = async (req : NextApiRequest, res : NextApiResponse<DefaultResponse>) => {
     try{
@@ -18,7 +27,7 @@ import {User } from '../../types/User';
         
         if(!obj.name || obj.name.length < 3 ||!obj.email || obj.email.length < 6 || !obj.password || 
             obj.password.length < 4){
-            return res.status(400).json({error: 'AQUI - Parametro de entrada invalido'});
+            return res.status(400).json({error: 'Parametro de entrada invalido'});
         }
 
         const existingUser = await UserModel.find({ email : obj.email})
@@ -42,4 +51,4 @@ import {User } from '../../types/User';
     }
 }
 
-export default dbConnect(handler);
+export default corsPolicy(dbConnect(handler));

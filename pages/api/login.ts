@@ -7,6 +7,7 @@ import user from './user';
 import { dbConnect } from '../../middlewares/dbConnect';
 import { JsonWebTokenError } from 'jsonwebtoken';
 import jwt from 'jsonwebtoken';
+import {corsPolicy} from "../../middlewares/corsPolicy";
 
 type DefaultReturn = {
     error? : string
@@ -40,20 +41,23 @@ const handler = async (req : NextApiRequest, res : NextApiResponse<DefaultRespon
             return res.status(500).json({error: 'Env MY_SECRET_KEY nao definida'})
         }
 
-        const obj : LoginRequest = req.body;
-        if(obj.login  && obj.password){
-            const usersFound = await UserModel.find({email : obj.login, password : md5(obj.password)});
+        const loginRequest: LoginRequest = req.body
+
+        if(loginRequest.login  && loginRequest.password){
+            const usersFound = await UserModel.find({email : loginRequest.login, password : md5(loginRequest.password)});
             if(usersFound && usersFound.length > 0){
                 const user : User = usersFound[0];
                 const token =jwt.sign({ _id : user._id}, MY_SECRET_KEY);
 
                 return res.status(200).json({name : user.name, email : user.email, token})
 
+            } else {
+                return res.status(400).json({error: "email ou password invalido!"});
             }
 
+        } else {
+            return res.status(400).json({error: "login e password nao informado"});
         }
-            return res.status(400).json({error: 'Parametro de entrada invalido'})
-
     }catch(e){
 
         console.log(e);
@@ -62,4 +66,4 @@ const handler = async (req : NextApiRequest, res : NextApiResponse<DefaultRespon
     }
 }
 
-export default dbConnect(handler);
+export default corsPolicy(dbConnect(handler));

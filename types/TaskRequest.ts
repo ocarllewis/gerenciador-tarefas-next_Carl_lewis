@@ -1,10 +1,9 @@
 
-export type Task = {
-    _id? : string 
-    userId : string 
+export type TaskRequest = {
+
     name : string
     finishPrevisionData : Date
-    finishData? :  Date
+
 
     
 }
