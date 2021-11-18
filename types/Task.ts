@@ -3,8 +3,8 @@ export type Task = {
     _id? : string 
     userId : string 
     name : string
-    finishPrevisionData : Date
-    finishData? :  Date
+    finishPrevisionDate : Date
+    finishDate? :  Date
 
     
 }

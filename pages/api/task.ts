@@ -56,15 +56,15 @@ const validateAndReturnTaskFound = async (req: NextApiRequest, userId: string | 
 
 const validateBody = (obj: TaskRequest, userId: string | null | undefined) => {
     if (!obj.name || obj.name.length < 3) {
-        return '"Invalid task name.';
+        return '"nome invalido.';
     }
 
     if (!userId) {
-        return 'User not found.';
+        return 'usuario invalido.';
     }
 
-    if (!obj.finishPrevisionData) { 
-        return 'Prevision date not informedData de previsao nao informada.';
+    if (!obj.finishPrevisionDate) { 
+        return 'Data de previsao nao informada.';
     }
 }
 
@@ -79,7 +79,7 @@ const saveTask = async (req: NextApiRequest, res: NextApiResponse<DefaultRespons
     const task: Task = {
         userId: userId as string,
         name: taskRequest.name,
-        finishPrevisionData: taskRequest.finishPrevisionData
+        finishPrevisionDate: taskRequest.finishPrevisionDate
     };
 
     await TaskModel.create(task);
@@ -100,8 +100,8 @@ const updateTask = async (req: NextApiRequest, res: NextApiResponse<DefaultRespo
     }
 
     taskFound.name = task.name;
-    taskFound.finishPrevisionDate = task.finishPrevisionData;
-    taskFound.finishDate = task.finishData;
+    taskFound.finishPrevisionDate = task.finishPrevisionDate;
+    taskFound.finishDate = task.finishDate;
 
     await TaskModel.findByIdAndUpdate({_id: taskFound._id}, taskFound);
     return res.status(200).json({message: "Task updated with successful!"});

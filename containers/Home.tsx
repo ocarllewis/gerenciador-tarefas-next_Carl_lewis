@@ -1,42 +1,77 @@
-import { NextPage } from "next";
-import { useEffect, useState } from "react";
-import { Modal } from "react-bootstrap";
-import { Filter } from "../components/Filter";
-import { Footer } from "../components/Footer";
+import {NextPage} from "next";
+import {AccessTokenProps} from "../types/AccessTokenProps";
+import {Header} from "../components/Header";
+import {Filter} from "../components/Filter";
+import {Footer} from "../components/Footer";
+import {List} from "../components/List";
+import {useEffect, useState} from "react";
+import {Task} from "../types/Task";
+import {executeRequest} from "../services/api";
+import {Modal} from "react-bootstrap";
 
-import { Header } from "../components/Header";
-import { List } from "../components/List";
-import { executeRequest } from "../services/api";
-import { AccessTokenProps } from "../types/AccessTokenProps";
-import { Task } from "../types/Task";
-
-/* eslint-disable @next/next/no-img-element */
-const Home: NextPage<AccessTokenProps> = ({
-    setToken
-}) => {
+const Home: NextPage<AccessTokenProps> = ({setToken}) => {
 
     const [tasks, setTasks] = useState<Task[]>([]);
     const [finishPrevisionDateStart, setFinishPrevisionDateStart] = useState('');
     const [finishPrevisionDateEnd, setFinishPrevisionDateEnd] = useState('');
     const [status, setStatus] = useState('0');
 
-    // states do modal/form
     const [showModal, setShowModal] = useState(false);
     const [isLoading, setLoading] = useState(false);
-    const [msgErro, setMsgErro] = useState('');
+    const [msgError, setMsgError] = useState('');
     const [name, setName] = useState('');
     const [finishPrevisionDate, setFinishPrevisionDate] = useState('');
 
     const logout = () => {
-        localStorage.removeItem('accessToken');
-        localStorage.removeItem('userName');
-        localStorage.removeItem('userMail');
-        setToken('');
+        localStorage.removeItem("accessToken");
+        localStorage.removeItem("userName");
+        localStorage.removeItem("userMail");
+        setToken('')
     }
 
-    const getListaFiltrada = async () => {
-        try {
+    const closeModal = () => {
+        setName('');
+        setFinishPrevisionDate('');
+        setLoading(false);
+        setMsgError('');
+        setShowModal(false);
+    }
 
+    const doSave = async () => {
+        try {
+            setLoading(true)
+            setMsgError('')
+            if (!name && !finishPrevisionDate) {
+                setMsgError('Favor informar nome e data de previsão da tarefa');
+                setLoading(false)
+                return
+            }
+
+            const body = {
+                name,
+                finishPrevisionDate
+            }
+
+            const result = await executeRequest('task', 'POST', body);
+            if (result && result.data) {
+                await getFilteredList()
+                closeModal()
+            } else {
+                setMsgError('Não foi possível salvar. Tente novamente');
+            }
+        } catch (e: any) {
+            console.log(e)
+            if (e?.response?.data?.error) {
+                setMsgError(e?.response?.data?.error);
+            } else {
+                setMsgError('Não foi possivel salvar. tente novamente');
+            }
+        }
+        setLoading(false)
+    }
+
+    const getFilteredList = async () => {
+        try {
             let query = `?status=${status}`;
 
             if (finishPrevisionDateStart) {
@@ -52,53 +87,13 @@ const Home: NextPage<AccessTokenProps> = ({
                 setTasks(result.data);
             }
         } catch (e: any) {
-            console.log(e);
+            console.log(e)
         }
     }
 
     useEffect(() => {
-        getListaFiltrada();
+        getFilteredList();
     }, [finishPrevisionDateStart, finishPrevisionDateEnd, status]);
-
-    const closeModal = () => {
-        setName('');
-        setFinishPrevisionDate('');
-        setLoading(false);
-        setMsgErro('');
-        setShowModal(false);
-    }
-
-    const doSave = async() => {
-        try {
-            setLoading(true);
-            setMsgErro('');
-            if (!name && !finishPrevisionDate) {
-                setMsgErro('Favor informar os dados para cadastro da tarefa');
-                setLoading(false);
-                return;
-            }
-
-            const body = {
-                name,
-                finishPrevisionDate
-            }
-
-            const result = await executeRequest('task', 'POST', body);
-            if (result && result.data) {
-                await getListaFiltrada();
-                closeModal();
-            }
-        } catch (e: any) {
-            console.log(e);
-            if (e?.response?.data?.error) {
-                setMsgErro(e?.response?.data?.error);
-            } else {
-                setMsgErro('Não foi possivel cadastrar tarefa, tente novamente');
-            }
-        }
-
-        setLoading(false);
-    }
 
     return (
         <>
@@ -111,24 +106,24 @@ const Home: NextPage<AccessTokenProps> = ({
                 setFinishPrevisionDateEnd={setFinishPrevisionDateEnd}
                 setStatus={setStatus}
             />
-            <List tasks={tasks} getListaFiltrada={getListaFiltrada}/>
+            <List tasks={tasks} getFilteredList={getFilteredList}/>
             <Footer showModal={() => setShowModal(true)}/>
             <Modal show={showModal}
-                onHide={() => closeModal()}
-                className="container-modal">
+                   onHide={() => closeModal()}
+                   className="container-modal">
                 <Modal.Body>
                     <p>Adicionar uma tarefa</p>
-                    {msgErro && <p className="error">{msgErro}</p>}
+                    {msgError && <p className="error">{msgError}</p>}
                     <input type="text"
-                        placeholder="Nome da tarefa"
-                        value={name}
-                        onChange={e => setName(e.target.value)} />
+                           placeholder="Nome da tarefa"
+                           value={name}
+                           onChange={e => setName(e.target.value)}/>
                     <input type="text"
-                        placeholder="Data de previsão de conclusão"
-                        value={finishPrevisionDate}
-                        onChange={e => setFinishPrevisionDate(e.target.value)}
-                        onFocus={e => e.target.type = "date"}
-                        onBlur={e => finishPrevisionDate ? e.target.type = "date" : e.target.type = "text"} />
+                           placeholder="Data de previsão de conclusão"
+                           value={finishPrevisionDate}
+                           onChange={e => setFinishPrevisionDate(e.target.value)}
+                           onFocus={e => e.target.type = "date"}
+                           onBlur={e => finishPrevisionDate ? e.target.type = "date" : e.target.type = "text"}/>
                 </Modal.Body>
                 <Modal.Footer>
                     <div className="button col-12">
@@ -143,5 +138,4 @@ const Home: NextPage<AccessTokenProps> = ({
         </>
     );
 }
-
-export { Home }
+export {Home};

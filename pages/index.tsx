@@ -1,7 +1,6 @@
 import type {NextPage} from 'next'
 import {useEffect, useState} from "react";
 import {Login} from '../containers/Login'
-import {Register} from '../containers/Register'
 import {Home} from '../containers/Home'
 
 const Index: NextPage = () => {
@@ -22,12 +21,10 @@ const Index: NextPage = () => {
     if (accessToken) {
         screen = <Home setToken={setToken}/>
     } else {
-        if (toRegister) {
-            screen = <Register toRegister={setToRegister}/>
-        } else {
+
             screen = <Login setToken={setToken} setToRegister={setToRegister}/>
         }
-    }
+    
     return screen;
 }
 

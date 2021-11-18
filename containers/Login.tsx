@@ -81,11 +81,7 @@ export const Login: NextPage<LoginProps> = ({setToken, setToRegister}) => {
                     {isLoading ? '...Carregando' : 'Login'}
                 </button>
 
-                <p className="registerMessage"
-                   onClick={() => setToRegister(true)}
-                >
-                    Ainda não tem cadastro? <span>Registre-se.</span>
-                </p>
+
             </form>
         </div>
     )
